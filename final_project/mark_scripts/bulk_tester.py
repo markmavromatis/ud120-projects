@@ -127,12 +127,15 @@ def main():
     appendFeatures(dataset)
 
 
-    #classifiers = ["NaiveBayes", "DecisionTree", "RandomForest"]
-    classifiers = ["SupportVectorMachine"]
+    classifiers = ["NaiveBayes", "DecisionTree", "RandomForest"]
+    # classifiers = ["SupportVectorMachine"]
     # print "Feature list is: ", feature_list
     ### Run testing script
 
-    important_features = ["total_payments", "total_stock_value", "salary", "bonus", "exercised_stock_options", "shared_receipt_with_poi","to_messages","from_messages", "to_poi_ratio", "exercised_stock_percent", "bonus_salary_ratio", "bonus_total_ratio"]
+    #important_features = ["total_payments", "total_stock_value", "salary", "bonus", "exercised_stock_options", "shared_receipt_with_poi","to_messages","from_messages", "to_poi_ratio", "exercised_stock_percent", "bonus_salary_ratio", "bonus_total_ratio"]
+
+    # SelectKBest Results
+    important_features = ['total_payments','total_stock_value','exercised_stock_options','bonus','restricted_stock','other','salary','expenses','shared_receipt_with_poi','to_messages']
 
     # important_features = ["salary", "bonus"]
     print "# Rows = " , len(dataset)

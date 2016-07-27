@@ -10,6 +10,13 @@ def load_data():
     return dataset
 
 def getStats(dataset):
+    actual_stats = calculateStats(dataset)
+    feature_list = []
+    for each_record in actual_stats:
+        feature_list.append(each_record[0])
+    return feature_list
+
+def calculateStats(dataset):
     row_count = 0
     stats = {}
 
