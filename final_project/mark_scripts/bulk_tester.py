@@ -13,10 +13,14 @@
 import pickle
 import sys
 import numpy
+from append_features import appendFeatures
+from outlier_removal import removeOutliers
 
 from sklearn.cross_validation import StratifiedShuffleSplit
 # Naive Bayes Classifier
 from sklearn.naive_bayes import GaussianNB
+# Support Vector Machine
+from sklearn.svm import SVC
 # Decision Tree Classifier
 from sklearn import tree
 # Random Forest Estimator
@@ -25,7 +29,6 @@ from sklearn.ensemble import RandomForestClassifier
 sys.path.append("../../tools/")
 from feature_format import featureFormat, targetFeatureSplit
 
-classifiers = ["naive_bayes"];
 
 PERF_FORMAT_STRING = "\
 \tAccuracy: {:>0.{display_precision}f}\tPrecision: {:>0.{display_precision}f}\t\
@@ -89,6 +92,8 @@ def test_classifier(clf, dataset, feature_list, results_summary, folds=1000):
             classifierType = "Decision Tree"
         elif isinstance(clf, RandomForestClassifier):
             classifierType = "Random Forest"
+        elif isinstance(clf, SVC):
+            classifierType = "Support Vector Machine"
         else:
             raise Exception("Unsupported classifier type: " + type(clf))
         results_summary.append(classifierType + ", " + ', '.join(feature_list[1:]) + ", "
@@ -100,6 +105,8 @@ def test_classifier(clf, dataset, feature_list, results_summary, folds=1000):
                                            true_negatives)
         print ""
     except:
+        print sys.exc_info()[0]
+        # raise
         print "Got a divide by zero when trying out:", clf
         print "Precision or recall may be undefined due to a lack of true positive predicitons."
 
@@ -117,13 +124,16 @@ def load_data():
 def main():
     ### load up student's classifier, dataset, and feature_list
     dataset = load_data()
+    appendFeatures(dataset)
 
-    classifiers = ["NaiveBayes", "DecisionTree", "RandomForest"]
 
+    #classifiers = ["NaiveBayes", "DecisionTree", "RandomForest"]
+    classifiers = ["SupportVectorMachine"]
     # print "Feature list is: ", feature_list
     ### Run testing script
 
-    important_features = ["total_payments", "total_stock_value", "salary", "bonus", "exercised_stock_options", "shared_receipt_with_poi","to_messages","from_messages", "to_poi_ratio"]
+    important_features = ["total_payments", "total_stock_value", "salary", "bonus", "exercised_stock_options", "shared_receipt_with_poi","to_messages","from_messages", "to_poi_ratio", "exercised_stock_percent", "bonus_salary_ratio", "bonus_total_ratio"]
+
     # important_features = ["salary", "bonus"]
     print "# Rows = " , len(dataset)
 #    print(dataset)
@@ -131,16 +141,16 @@ def main():
     # For missing fields, fill in 0
     for row_key in dataset:
         a_row = dataset[row_key]
-        for each_feature in important_features:
-            if each_feature not in a_row:
-                a_row[each_feature] = 1
+        # print "Total payments: ", a_row['total_payments']
+        if str(a_row['total_payments']) == 'NaN':
+            a_row['total_payments'] = 1
+        if str(a_row['total_stock_value']) == 'NaN':
+            a_row['total_stock_value'] = 1
+        if str(a_row['salary']) == 'NaN':
+            a_row['salary'] = 1
 
     # Remove outliers due to bad data including
-    #Totals Row
-    del dataset['TOTAL']
-    # Some travel agency
-    del dataset['THE TRAVEL AGENCY IN THE PARK']
-
+    removeOutliers(dataset)
     # How many rows left?
     print "Rows after cleanup: " , len(dataset)
 
@@ -155,17 +165,20 @@ def main():
             clf = tree.DecisionTreeClassifier()
         elif each_classifier == "RandomForest":
             clf = RandomForestClassifier(n_estimators=10)
+        elif each_classifier == "SupportVectorMachine":
+            clf = SVC()
         else:
             raise Exception("Unsupported classifier type: " + each_classifier)
 
         for i in range(len(important_features) - 2):
             for j in range(i + 1, len(important_features) - 1):
                 for k in range(j + 1, len(important_features)):
+                    print i,j,k
                     iterate_features = [important_features[i], important_features[j], important_features[k]]
                 # print "Testing NB classifier for features: " + str(iterate_features)
-                classifier_features = ["poi"] + iterate_features
-                print "CLF Features: " + str(classifier_features)
-                test_classifier(clf, dataset, classifier_features, results_summary)
+                    classifier_features = ["poi"] + iterate_features
+                    print "CLF Features: " + str(classifier_features)
+                    test_classifier(clf, dataset, classifier_features, results_summary)
 
     print "Here are the results:"
     print "\n".join(results_summary)

@@ -1,6 +1,6 @@
 import pickle
 import math
-
+from append_features import appendFeatures
 """
     Data Viewer - Use this to look at the data while thinking about the
     right set of features and machine learning algorithms
@@ -24,7 +24,7 @@ def createDataWorksheet(dataset):
             if str(output_element) == 'NaN':
                 output_element = ""
             output_line += str(output_element) + ","
-        output_line += "\n"            
+        output_line += "\n"
         output_file.write(output_line)
         i += 1
     output_file.close()
@@ -39,6 +39,7 @@ def load_data():
 def main():
     ### load up student's classifier, dataset, and feature_list
     dataset = load_data()
+    appendFeatures(dataset)
     createDataWorksheet(dataset)
 
 if __name__ == '__main__':
