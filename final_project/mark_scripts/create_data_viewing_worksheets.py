@@ -21,8 +21,8 @@ def createDataWorksheet(dataset):
         output_line += each_key + ","
         for each_element in dataset[each_key]:
             output_element = dataset[each_key][each_element]
-            if str(output_element) == 'NaN':
-                output_element = ""
+            # if str(output_element) == 'NaN':
+            #     output_element = ""
             output_line += str(output_element) + ","
         output_line += "\n"
         output_file.write(output_line)

@@ -145,12 +145,12 @@ def main():
     for row_key in dataset:
         a_row = dataset[row_key]
         # print "Total payments: ", a_row['total_payments']
-        if str(a_row['total_payments']) == 'NaN':
-            a_row['total_payments'] = 1
-        if str(a_row['total_stock_value']) == 'NaN':
-            a_row['total_stock_value'] = 1
-        if str(a_row['salary']) == 'NaN':
-            a_row['salary'] = 1
+        # if str(a_row['total_payments']) == 'NaN':
+        #     a_row['total_payments'] = 1
+        # if str(a_row['total_stock_value']) == 'NaN':
+        #     a_row['total_stock_value'] = 1
+        # if str(a_row['salary']) == 'NaN':
+        #     a_row['salary'] = 1
 
     # Remove outliers due to bad data including
     removeOutliers(dataset)
@@ -173,15 +173,25 @@ def main():
         else:
             raise Exception("Unsupported classifier type: " + each_classifier)
 
-        for i in range(len(important_features) - 2):
-            for j in range(i + 1, len(important_features) - 1):
-                for k in range(j + 1, len(important_features)):
-                    print i,j,k
-                    iterate_features = [important_features[i], important_features[j], important_features[k]]
+        # # 3-feature test
+        # for i in range(len(important_features) - 2):
+        #     for j in range(i + 1, len(important_features) - 1):
+        #         for k in range(j + 1, len(important_features)):
+        #             print i,j,k
+        #             iterate_features = [important_features[i], important_features[j], important_features[k]]
+        #         # print "Testing NB classifier for features: " + str(iterate_features)
+        #             classifier_features = ["poi"] + iterate_features
+        #             print "CLF Features: " + str(classifier_features)
+        #             test_classifier(clf, dataset, classifier_features, results_summary)
+
+        # 2-feature test
+        for i in range(len(important_features) - 1):
+            for j in range(i + 1, len(important_features)):
+                iterate_features = [important_features[i], important_features[j]]
                 # print "Testing NB classifier for features: " + str(iterate_features)
-                    classifier_features = ["poi"] + iterate_features
-                    print "CLF Features: " + str(classifier_features)
-                    test_classifier(clf, dataset, classifier_features, results_summary)
+                classifier_features = ["poi"] + iterate_features
+                print "CLF Features: " + str(classifier_features)
+                test_classifier(clf, dataset, classifier_features, results_summary)
 
     print "Here are the results:"
     print "\n".join(results_summary)
