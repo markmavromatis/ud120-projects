@@ -33,6 +33,7 @@ def appendFeatures(dataset):
         datarow = dataset[each_key]
         datarow["from_poi_ratio"] = scaleEmails(datarow["from_poi_to_this_person"], datarow["to_messages"])
         datarow["to_poi_ratio"] = scaleEmails(datarow["from_this_person_to_poi"], datarow["from_messages"])
+        datarow["shared_receipt_poi_ratio"] = scaleEmails(datarow["shared_receipt_with_poi"], datarow["to_messages"])
         # How much of total stock holdings was exercised?
         datarow["exercised_stock_percent"] = scaleExercisedStock(datarow["exercised_stock_options"], datarow["total_stock_value"])
         # What is the ratio of bonus to salary? High bonus may indicate strange incentives?
