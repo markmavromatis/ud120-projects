@@ -1,13 +1,10 @@
 #!/usr/bin/pickle
 
-""" a basic script for importing student's POI identifier,
-    and checking the results that they get from it
+"""
+Modified version of tester that iterates through features and tries different combinations of them
+against different classifiers.
 
-    requires that the algorithm, dataset, and features list
-    be written to my_classifier.pkl, my_dataset.pkl, and
-    my_feature_list.pkl, respectively
-
-    that process should happen at the end of poi_id.py
+This script tests all iterations of 3-feature classifiers
 """
 
 import pickle
@@ -29,6 +26,7 @@ from sklearn.ensemble import RandomForestClassifier
 sys.path.append("../../tools/")
 from feature_format import featureFormat, targetFeatureSplit
 
+OUTPUT_FILENAME = "reports/3feature_results.csv"
 
 PERF_FORMAT_STRING = "\
 \tAccuracy: {:>0.{display_precision}f}\tPrecision: {:>0.{display_precision}f}\t\
@@ -111,9 +109,7 @@ def test_classifier(clf, dataset, feature_list, results_summary, folds=1000):
         print "Precision or recall may be undefined due to a lack of true positive predicitons."
 
 
-CLF_PICKLE_FILENAME = "../my_classifier.pkl"
 DATASET_PICKLE_FILENAME = "../my_dataset.pkl"
-FEATURE_LIST_FILENAME = "../my_feature_list.pkl"
 
 def load_data():
     with open(DATASET_PICKLE_FILENAME, "r") as dataset_infile:
@@ -129,17 +125,6 @@ def main():
 
     classifiers = ["NaiveBayes", "DecisionTree", "RandomForest"]
 
-    # SelectKBest Results
-#    important_features = ['total_payments','total_stock_value','exercised_stock_options','bonus','restricted_stock','other','salary','expenses','shared_receipt_with_poi','to_messages']
-
-    # Another iteration (7/28)
-
-
-    # important_features = ['loan_advances','total_payments','total_stock_value','exercised_stock_options',
-    #                       'bonus','restricted_stock','other','long_term_incentive','salary','expenses',
-    #                       'shared_receipt_with_poi','to_messages','from_messages']
-
-    # important_features = ["salary", "bonus"]
 
     # Final iteration
     important_features = ['total_payments','total_stock_value','exercised_stock_options','bonus','restricted_stock','shared_receipt_with_poi','to_messages',
@@ -147,13 +132,8 @@ def main():
 
     print "# Rows = " , len(dataset)
 
-    # Remove outliers due to bad data including
-    removeOutliers(dataset)
-    # How many rows left?
-    print "Rows after cleanup: " , len(dataset)
-
     results_summary = []
-    results_summary.append("Classifier,Field1,Field2,,accuracy, precision, recall, f1, f2")
+    results_summary.append("Classifier,Field1,Field2,Field3,,accuracy, precision, recall, f1, f2")
     # Pick 2 of each item in the important features list
     for each_classifier in classifiers:
         clf = 0
@@ -163,8 +143,6 @@ def main():
             clf = tree.DecisionTreeClassifier()
         elif each_classifier == "RandomForest":
             clf = RandomForestClassifier(n_estimators=10)
-        elif each_classifier == "SupportVectorMachine":
-            clf = SVC()
         else:
             raise Exception("Unsupported classifier type: " + each_classifier)
 
@@ -179,22 +157,10 @@ def main():
                     print "CLF Features: " + str(classifier_features)
                     test_classifier(clf, dataset, classifier_features, results_summary)
 
-        # 2-feature test
-        # for i in range(len(important_features) - 1):
-        #     for j in range(i + 1, len(important_features)):
-        #
-        #         # Some combinations do not have enough information to build a model
-        #         if important_features[i] == 'loan_advances' and important_features[j] == 'director_fees':
-        #             continue
-        #
-        #         iterate_features = [important_features[i], important_features[j]]
-        #         # print "Testing NB classifier for features: " + str(iterate_features)
-        #         classifier_features = ["poi"] + iterate_features
-        #         print "CLF Features: " + str(classifier_features)
-        #         test_classifier(clf, dataset, classifier_features, results_summary)
+    outfile = open(OUTPUT_FILENAME, "w")
+    outfile.write("\n".join(results_summary))
+    outfile.close()
 
-    print "Here are the results:"
-    print "\n".join(results_summary)
-
+    print("Saved results to file: " + OUTPUT_FILENAME)
 if __name__ == '__main__':
     main()

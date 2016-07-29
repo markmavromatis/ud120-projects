@@ -1,5 +1,8 @@
 import math
 
+'''
+    Add scaled attributes for financial and email statistics
+'''
 def getBonusSalaryRatio(bonusAmount, salaryAmount):
     if str(bonusAmount) != 'NaN' and str(salaryAmount) != 'NaN' and salaryAmount!= 0:
         return 1.0 * bonusAmount / salaryAmount
