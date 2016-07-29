@@ -41,7 +41,7 @@ PERF_FORMAT_CSV = "\
 RESULTS_FORMAT_CSV = ", {:4d}, {:4d}, {:4d}, {:4d}, {:4d}"
 
 
-def test_classifier(clf, dataset, feature_list, results_summary, folds=1000):
+def test_classifier(clf, dataset, feature_list, results_summary, folds=10):
     data = featureFormat(dataset, feature_list, sort_keys=True)
     labels, features = targetFeatureSplit(data)
     cv = StratifiedShuffleSplit(labels, folds, random_state=42)
@@ -168,30 +168,16 @@ def main():
         else:
             raise Exception("Unsupported classifier type: " + each_classifier)
 
-        # 3-feature test
-        for i in range(len(important_features) - 2):
-            for j in range(i + 1, len(important_features) - 1):
-                for k in range(j + 1, len(important_features)):
-                    print i,j,k
-                    iterate_features = [important_features[i], important_features[j], important_features[k]]
-                # print "Testing NB classifier for features: " + str(iterate_features)
-                    classifier_features = ["poi"] + iterate_features
-                    print "CLF Features: " + str(classifier_features)
-                    test_classifier(clf, dataset, classifier_features, results_summary)
 
         # 2-feature test
-        # for i in range(len(important_features) - 1):
-        #     for j in range(i + 1, len(important_features)):
-        #
-        #         # Some combinations do not have enough information to build a model
-        #         if important_features[i] == 'loan_advances' and important_features[j] == 'director_fees':
-        #             continue
-        #
-        #         iterate_features = [important_features[i], important_features[j]]
-        #         # print "Testing NB classifier for features: " + str(iterate_features)
-        #         classifier_features = ["poi"] + iterate_features
-        #         print "CLF Features: " + str(classifier_features)
-        #         test_classifier(clf, dataset, classifier_features, results_summary)
+        for i in range(len(important_features) - 1):
+            for j in range(i + 1, len(important_features)):
+
+                iterate_features = [important_features[i], important_features[j]]
+                # print "Testing NB classifier for features: " + str(iterate_features)
+                classifier_features = ["poi"] + iterate_features
+                print "CLF Features: " + str(classifier_features)
+                test_classifier(clf, dataset, classifier_features, results_summary)
 
     print "Here are the results:"
     print "\n".join(results_summary)
