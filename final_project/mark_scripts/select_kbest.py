@@ -48,26 +48,44 @@ def load_data():
         dataset = pickle.load(dataset_infile)
     return dataset
 
+def getKbestFields(fields):
+
+    # SelectKBest only works with positive numeric values.
+    i = 0
+    for each_field in fields:
+        # String fields
+        if each_field == "poi" or each_field == "email_address":
+            fields.pop(i)
+        # Fields containing negative values
+        if each_field == "deferral_payments" or each_field == "deferred_income"\
+                or each_field == "restricted_stock_deferred":
+            fields.pop(i)
+        i += 1
+
+    return fields
 
 def main():
     ### load up student's classifier, dataset, and feature_list
     dataset = load_data()
     # Remove outlier records
     removeOutliers(dataset)
-
-    # SelectKBest only works with positive values.
-    # Apparently some negative numbers are causing problems....
-
-    # Why does this guy have no salary and negative restricted stock?
-    # He seems like an outleir
-    del dataset['BHATNAGAR SANJAY']
-    # He has negative stock too
+    # Robert Belfer has negative total stock which is messing with SelectKBest
+    # Let's remove this 'outlier' here.
     del dataset['BELFER ROBERT']
+    # Sanjay Bhatnagar has negative restricted stock which is messing with SelectKBest
+    del dataset['BHATNAGAR SANJAY']
 
     appendFeatures(dataset)
-    top_stats = getStats(dataset)
-    print("Top stats = ", top_stats)
-    runSelectKBest(5, dataset, ['poi'] + top_stats)
+
+    # Filter out fields to prepare for SelectKBest
+    names = dataset.keys()
+    fields = dataset[names[0]].keys()
+    fields = getKbestFields(fields)
+
+
+    # top_stats = getStats(dataset)
+    # print("Top stats = ", top_stats)
+    runSelectKBest(5, dataset, ['poi'] + fields)
 
 if __name__ == '__main__':
     main()
