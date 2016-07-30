@@ -13,8 +13,8 @@ from outlier_removal import removeOutliers
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
 ### The first feature must be "poi".
-features_list = ['poi','exercised_stock_options','shared_receipt_poi_ratio']
 
+features_list = ['poi','exercised_stock_options', 'to_messages', 'shared_receipt_poi_ratio']
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
@@ -41,7 +41,7 @@ labels, features = targetFeatureSplit(data)
 # Provided to give you a starting point. Try a variety of classifiers.
 from sklearn.naive_bayes import GaussianNB
 from sklearn.tree import DecisionTreeClassifier
-clf = DecisionTreeClassifier()
+clf = DecisionTreeClassifier(max_features=2, min_samples_split=6)
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script. Check the tester.py script in the final project

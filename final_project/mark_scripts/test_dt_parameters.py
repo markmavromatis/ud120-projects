@@ -26,7 +26,7 @@ Recall: {:>0.{display_precision}f}\tF1: {:>0.{display_precision}f}\tF2: {:>0.{di
 RESULTS_FORMAT_STRING = "\tTotal predictions: {:4d}\tTrue positives: {:4d}\tFalse positives: {:4d}\
 \tFalse negatives: {:4d}\tTrue negatives: {:4d}"
 
-def test_classifier(clf, dataset, feature_list, folds = 1000):
+def test_classifier(clf, dataset, feature_list, summaries, folds = 1000):
     data = featureFormat(dataset, feature_list, sort_keys = True)
     labels, features = targetFeatureSplit(data)
     cv = StratifiedShuffleSplit(labels, folds, random_state = 42)
@@ -70,44 +70,56 @@ def test_classifier(clf, dataset, feature_list, folds = 1000):
         recall = 1.0*true_positives/(true_positives+false_negatives)
         f1 = 2.0 * true_positives/(2*true_positives + false_positives+false_negatives)
         f2 = (1+2.0*2.0) * precision*recall/(4*precision + recall)
-        # print clf
-
+        summaries[len(summaries) - 1] += "" + str(accuracy) + "," + str(precision) + "," +\
+                str(recall) + "," + str(f1) + "," + str(f2)
         print "Accuracy = ", accuracy, "Precision = ", precision, "Recall =", recall
-        # print PERF_FORMAT_STRING.format(accuracy, precision, recall, f1, f2, display_precision = 5)
-        # print RESULTS_FORMAT_STRING.format(total_predictions, true_positives, false_positives, false_negatives, true_negatives)
         print ""
     except:
+        print sys.exc_info()[0]
+        print ""
         print "Got a divide by zero when trying out:", clf
         print "Precision or recall may be undefined due to a lack of true positive predicitons."
 
 DATASET_PICKLE_FILENAME = "../my_dataset.pkl"
+FEATURE_LIST_FILENAME = "../my_feature_list.pkl"
+OUTPUT_FILENAME = "reports/DTParametersReport.csv"
 
-
-def load_data():
+def load_features_and_data():
     with open(DATASET_PICKLE_FILENAME, "r") as dataset_infile:
         dataset = pickle.load(dataset_infile)
-    return dataset
+    with open(FEATURE_LIST_FILENAME, "r") as featurelist_infile:
+        feature_list = pickle.load(featurelist_infile)
+    return dataset, feature_list
 
 def main():
     ### load up student's classifier, dataset, and feature_list
-    dataset = load_data()
+    dataset, feature_list = load_features_and_data()
 
-
-    feature_list = ['poi','exercised_stock_options','shared_receipt_poi_ratio']
-    parameters = {'max_depth':(None, 5, 6, 7, 8, 9, 10), 'min_samples_split':[2, 4, 6, 8]}
-    svr = DecisionTreeClassifier()
-    # clf = grid_search.GridSearchCV(svr, parameters)
-
-    depth_options = (None, 5, 6, 7, 8, 9, 10)
+    # Iteration classifier tuning parameters
+    max_feature_options = (1, 2, 3)
+    max_depth_options = (None, 5, 6, 7, 8, 9, 10)
     min_samples_split_options = (2, 4, 6, 8)
 
-    ### Run testing script
-    for each_depth_option in depth_options:
-        for each_min_samples_option in min_samples_split_options:
-            clf = DecisionTreeClassifier(max_depth = each_depth_option, min_samples_split = each_min_samples_option)
-            print("Testing max_depth =", each_depth_option, "  Min Samples Split=", each_min_samples_option)
-            test_classifier(clf, dataset, feature_list)
+    results_summary = []
+    results_summary.append("max_features, max_depth, min_samples_split,, accuracy, precision, recall, f1, f2")
+
+    # Run classifier tests for each parameter setting.
+    for each_max_feature_option in max_feature_options:
+        for each_depth_option in max_depth_options:
+            for each_min_samples_option in min_samples_split_options:
+                clf = DecisionTreeClassifier(max_features = each_max_feature_option, max_depth = each_depth_option, min_samples_split = each_min_samples_option)
+                resultsSummaryHeader = "" + str(each_max_feature_option) + "," + str(each_depth_option) + "," + str(each_min_samples_option) + ",,"
+                results_summary.append(resultsSummaryHeader)
+                test_classifier(clf, dataset, feature_list, results_summary)
+
+    print("\n".join(results_summary))
     print("Done")
+
+    outfile = open(OUTPUT_FILENAME, "w")
+    outfile.write("\n".join(results_summary))
+    outfile.close()
+
+    print("Saved results to file: " + OUTPUT_FILENAME)
     # print "Best parameters = ",clf.best_params_
 
 if __name__ == '__main__':

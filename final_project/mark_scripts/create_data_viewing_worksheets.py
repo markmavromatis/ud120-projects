@@ -7,7 +7,7 @@ sys.path.append("../../tools/")
 from feature_format import featureFormat, targetFeatureSplit
 
 """
-    Data Viewer - Use this to look at the data while thinking about the
+    Data Viewer - Use this to export the data to a CSV file. This helps me think about the
     right set of features and machine learning algorithms
 """
 DATASET_PICKLE_FILENAME = "../my_dataset.pkl"
